@@ -73,6 +73,13 @@ def git_branch(cwd):
 
 
 def main():
+    # Windows console/pipe stdout often defaults to a non-UTF-8 codepage
+    # (e.g. cp1252), which would raise on any non-ASCII character below.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
     try:
         data = json.load(sys.stdin)
     except Exception:
@@ -83,7 +90,7 @@ def main():
 
     branch = git_branch(data.get("workspace", {}).get("current_dir") or data.get("cwd"))
     if branch:
-        segments.append(f"{MAGENTA}⎇ {branch}{RESET}")
+        segments.append(f"{MAGENTA}git:{branch}{RESET}")
 
     model = (data.get("model") or {}).get("display_name", "?")
     effort = (data.get("effort") or {}).get("level")
